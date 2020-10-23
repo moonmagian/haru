@@ -2,7 +2,10 @@
 #define GAME_WINDOW_H
 
 #include <QMainWindow>
+#include <QProcess>
 #include "translate_entry_widget.h"
+#include "textractor_wrapper.h"
+#include "hook_display_widget.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class game_window;
@@ -18,10 +21,16 @@ class game_window : public QMainWindow {
 
     private slots:
     void on_debug_button_pushtext_clicked();
+    void update_text(const QString &text);
+    void got_hook_text(QString name, QString value);
 
     private:
     Ui::game_window *ui;
+    textractor_wrapper textractor;
+    QString using_hook;
+    QMap<QString, hook_display_widget *> hook_widgets;
     int x;
-    translate_entry_widget *w;
+    QVector<translate_entry_widget *> translating_entries;
+    void init_plugins();
 };
 #endif // GAME_WINDOW_H

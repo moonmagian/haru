@@ -5,6 +5,7 @@
 #include <lua.hpp>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <QGraphicsDropShadowEffect>
 translate_entry_widget::translate_entry_widget(QWidget *parent)
     : QWidget(parent), ui(new Ui::translate_entry_widget),
       worker(new translating_worker_lua) {
@@ -15,6 +16,12 @@ translate_entry_widget::translate_entry_widget(QWidget *parent)
     worker->connect(worker, &translating_worker::translation_done, this,
                     &translate_entry_widget::update_execution_result);
     freshness = 0;
+    QGraphicsDropShadowEffect *dse = new QGraphicsDropShadowEffect(this);
+    dse->setBlurRadius(5);
+    dse->setColor(QColor(255, 192, 203));
+    dse->setXOffset(0);
+    dse->setYOffset(0);
+    ui->content->setGraphicsEffect(dse);
 }
 
 translate_entry_widget::~translate_entry_widget() {
