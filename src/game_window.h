@@ -12,7 +12,7 @@ class game_window;
 }
 QT_END_NAMESPACE
 
-class game_window : public QMainWindow {
+class game_window : public QWidget {
     Q_OBJECT
 
     public:
@@ -54,5 +54,7 @@ class game_window : public QMainWindow {
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void enterEvent(QEvent *event) override;
+    void leaveEvent(QEvent *event) override;
 };
 #endif // GAME_WINDOW_H

@@ -10,7 +10,7 @@
 #include <QCloseEvent>
 #include <QDesktopWidget>
 game_window::game_window(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::game_window), using_hook(), pause(false),
+    : QWidget(parent), ui(new Ui::game_window), using_hook(), pause(false),
       drag_flag(false), resize_flag(false) {
     ui->setupUi(this);
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint |
@@ -196,6 +196,35 @@ void game_window::mouseMoveEvent(QMouseEvent *event) {
         nsize.setWidth(window_original_size.width() + delta.x());
         nsize.setHeight(window_original_size.height() + delta.y());
         this->resize(nsize);
+    }
+}
+
+void game_window::enterEvent(QEvent *event) {
+    if (!drag_flag && !resize_flag) {
+        auto original_size = size();
+        QSize nsize;
+        nsize.setWidth(original_size.width());
+        nsize.setHeight(original_size.height() +
+                        ui->top_layout_2->size().height());
+        ui->top_layout_2->show();
+        resize(nsize);
+
+        auto tabbar = ui->main_tab->findChild<QTabBar *>();
+        tabbar->show();
+    }
+}
+
+void game_window::leaveEvent(QEvent *event) {
+    if (!drag_flag && !resize_flag) {
+        auto original_size = size();
+        QSize nsize;
+        nsize.setWidth(original_size.width());
+        nsize.setHeight(original_size.height() -
+                        ui->top_layout_2->size().height());
+        ui->top_layout_2->hide();
+        resize(nsize);
+        auto tabbar = ui->main_tab->findChild<QTabBar *>();
+        tabbar->hide();
     }
 }
 
