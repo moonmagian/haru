@@ -7,22 +7,26 @@
 #include <QtGlobal>
 #include <QToolButton>
 #include <QTabBar>
+#include <QCloseEvent>
+#include <QDesktopWidget>
 game_window::game_window(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::game_window), using_hook() {
+    : QMainWindow(parent), ui(new Ui::game_window), using_hook(), pause(false),
+      drag_flag(false), resize_flag(false) {
     ui->setupUi(this);
-    // this->setWindowFlags(Qt::FramelessWindowHint);
-    this->setWindowFlags(Qt::NoDropShadowWindowHint);
+    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint |
+                         Qt::WindowStaysOnTopHint | Qt::NoDropShadowWindowHint);
+    //    this->setWindowFlags(Qt::NoDropShadowWindowHint);
     this->setAttribute(Qt::WA_TranslucentBackground);
     ui->translate_tab->setLayout(ui->translate_layout);
     ui->hook_tab->setLayout(ui->hook_layout);
-    //    w = new translate_entry_widget(this);
-    //    w->set_script("moontrans.lua");
-    //    w->set_name("test");
-    //    ui->translate_layout->addWidget(w);
+    ui->history_tab->setLayout(ui->history_layout);
+    //    ui->title->setAttribute(Qt::WA_TransparentForMouseEvents);
+    //    ui->main_tab->setCornerWidget(ui->corner_toolbar);
     init_plugins();
     ui->hook_scroll_contents->setLayout(ui->hook_scroll_list);
     connect(&textractor, &textractor_wrapper::updated_hook_text, this,
             &game_window::got_hook_text);
+    setMouseTracking(false);
     textractor.attach(924);
     x = 0;
 }
@@ -45,7 +49,13 @@ void game_window::on_debug_button_pushtext_clicked() {
 }
 
 void game_window::update_text(const QString &text) {
+    if (pause) {
+        return;
+    }
     ui->translate_text->setText(text);
+    ui->history->moveCursor(QTextCursor::End);
+    ui->history->insertPlainText(QString("%1\n").arg(text));
+    ui->history->moveCursor(QTextCursor::End);
     for (auto x : translating_entries) {
         x->push_text(text);
     }
@@ -72,6 +82,13 @@ void game_window::got_hook_text(QString name, QString value) {
         });
         ui->hook_scroll_list->addWidget(widget);
     }
+}
+
+void game_window::got_new_translated_text(QString name, QString value) {
+    // Append history.
+    ui->history->moveCursor(QTextCursor::End);
+    ui->history->insertPlainText(QString("[%1] %2\n").arg(name, value));
+    ui->history->moveCursor(QTextCursor::End);
 }
 
 void game_window::init_plugins() {
@@ -127,6 +144,65 @@ void game_window::init_plugins() {
         w->set_script(
             QString("plugins/%1/%2").arg(plugin_str, plugin_script.toString()));
         translating_entries.append(w);
+        connect(w, &translate_entry_widget::execution_finished, this,
+                &game_window::got_new_translated_text);
         ui->translate_result_layout->addWidget(w);
     }
 }
+
+void game_window::closeEvent(QCloseEvent *cevent) {
+    textractor.terminate();
+    emit exit_game_window();
+    cevent->accept();
+}
+
+void game_window::mousePressEvent(QMouseEvent *event) {
+    auto mouse_pos = event->globalPos();
+    auto mouse_pos_rel = ui->title->parentWidget()->mapFromGlobal(mouse_pos);
+    if (ui->title->geometry().contains(mouse_pos_rel)) {
+        mouse_move_begin_pos =
+            ui->title->parentWidget()->mapToGlobal(mouse_pos_rel);
+        window_move_begin_pos = pos();
+        QGuiApplication::setOverrideCursor(Qt::SizeAllCursor);
+        drag_flag = true;
+    } else if (ui->drag_sign->geometry().contains(mouse_pos_rel)) {
+        //        QCursor::setPos(this->geometry().bottomRight());
+        QApplication::desktop()->cursor().setPos(
+            this->geometry().bottomRight());
+        mouse_move_begin_pos = this->geometry().bottomRight();
+        window_original_size = this->size();
+        QGuiApplication::setOverrideCursor(Qt::SizeFDiagCursor);
+        resize_flag = true;
+    }
+}
+
+void game_window::mouseReleaseEvent(QMouseEvent *event) {
+    if (drag_flag) {
+        QGuiApplication::restoreOverrideCursor();
+        drag_flag = false;
+    } else if (resize_flag) {
+        QGuiApplication::restoreOverrideCursor();
+        resize_flag = false;
+    }
+}
+
+void game_window::mouseMoveEvent(QMouseEvent *event) {
+    if (drag_flag) {
+        this->move(window_move_begin_pos + event->globalPos() -
+                   mouse_move_begin_pos);
+    } else if (resize_flag) {
+        QSize nsize;
+        auto delta = event->globalPos() - mouse_move_begin_pos;
+        nsize.setWidth(window_original_size.width() + delta.x());
+        nsize.setHeight(window_original_size.height() + delta.y());
+        this->resize(nsize);
+    }
+}
+
+void game_window::on_pause_tool_button_toggled(bool checked) {
+    pause = checked;
+}
+
+void game_window::on_close_tool_button_clicked() { close(); }
+
+void game_window::on_close_tool_button_toggled(bool checked) {}

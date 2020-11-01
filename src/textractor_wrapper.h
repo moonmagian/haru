@@ -7,7 +7,9 @@ class textractor_wrapper : public QObject {
     Q_OBJECT
     public:
     explicit textractor_wrapper(QObject *parent = nullptr);
+    ~textractor_wrapper() override;
     bool attach(unsigned int pid);
+    void terminate();
 
     private:
     QProcess process;

@@ -60,6 +60,7 @@ void translate_entry_widget::update_execution_result(const QString &result) {
         }
     } else {
         ui->content->setText(result);
+        emit execution_finished(ui->name->text(), result);
     }
 }
 

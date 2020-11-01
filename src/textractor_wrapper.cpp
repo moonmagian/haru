@@ -23,6 +23,12 @@ textractor_wrapper::textractor_wrapper(QObject *parent)
     qInfo("Started Textractor.");
 }
 
+textractor_wrapper::~textractor_wrapper() {
+    if (process.state() == QProcess::Running) {
+        process.terminate();
+    }
+}
+
 bool textractor_wrapper::attach(unsigned int pid) {
     if (process.state() != QProcess::Running) {
         qCritical("Textractor is not started.");
@@ -40,6 +46,8 @@ bool textractor_wrapper::attach(unsigned int pid) {
     qInfo("Written attach information to textractor.");
     return true;
 }
+
+void textractor_wrapper::terminate() { process.kill(); }
 
 void textractor_wrapper::on_process_data_ready() {
     QTextCodec *codec = QTextCodec::codecForName("UTF-16");

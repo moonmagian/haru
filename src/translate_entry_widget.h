@@ -12,7 +12,7 @@ class translate_entry_widget;
 class translate_entry_widget : public QWidget {
     Q_OBJECT
     signals:
-    void execution_finished(QString result);
+    void execution_finished(QString name, QString result);
 
     public:
     explicit translate_entry_widget(QWidget *parent = nullptr);
@@ -31,8 +31,6 @@ class translate_entry_widget : public QWidget {
     unsigned long freshness;
     translating_worker *worker;
     QString script;
-    void execute_py(const QString &text);
-    void execute_lua(const QString &text);
     Ui::translate_entry_widget *ui;
 };
 

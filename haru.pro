@@ -14,6 +14,7 @@ SOURCES += \
     src/hook_display_widget.cpp \
     src/main.cpp \
     src/game_window.cpp \
+    src/main_window.cpp \
     src/textractor_wrapper.cpp \
     src/translate_entry_widget.cpp \
     src/translating_worker.cpp \
@@ -22,24 +23,30 @@ SOURCES += \
 HEADERS += \
     src/game_window.h \
     src/hook_display_widget.h \
+    src/main_window.h \
     src/textractor_wrapper.h \
     src/translate_entry_widget.h \
     src/translating_worker.h \
     src/translating_worker_lua.h
 
 FORMS += \
+    src/main_window.ui \
     src/ui/hook_display_widget.ui \
     src/ui/game_window.ui \
     src/ui/translate_entry_widget.ui
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-unix: LIBS += -lpython3.8 -llua5.3
-unix: INCLUDEPATH += /usr/include/python3.8
-unix: DEPENDPATH += /usr/include/python3.8
+#LIBS += -llua5.3
+LIBS += -llua
+
 unix: INCLUDEPATH += /usr/include/lua5.3
 unix: DEPENDPATH += /usr/include/lua5.3
 unix: DEFINES += USE_WINE
+
+RESOURCES += \
+    src/resources/images.qrc
