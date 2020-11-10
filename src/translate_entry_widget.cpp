@@ -50,6 +50,12 @@ void translate_entry_widget::push_text(const QString &text) {
     }
 }
 
+void translate_entry_widget::init_worker() {
+    if (worker != nullptr) {
+        worker->init();
+    }
+}
+
 void translate_entry_widget::update_execution_result(const QString &result) {
     // Out-dated result, drop it.
     if (freshness != worker->get_freshness()) {
@@ -63,87 +69,3 @@ void translate_entry_widget::update_execution_result(const QString &result) {
         emit execution_finished(ui->name->text(), result);
     }
 }
-
-// void translate_entry_widget::execute_py(const QString &text) {
-//    // Ugly python.
-//    // Fuck.
-//    long code = 0;
-//    QString result;
-//    std::string text_stdstr = text.toStdString();
-//    std::string script_stdstr = script.toStdString();
-//    PyObject *pName, *pModule, *pFunc;
-//    PyObject *pArgs, *pValue, *pResultCode, *pResultStr;
-//    std::wstring ws(Py_GetPath());
-//    Py_Initialize();
-//    pName = PyUnicode_DecodeFSDefault(script_stdstr.c_str());
-//    pModule = PyImport_Import(pName);
-//    Py_DECREF(pName);
-//    if (pModule != nullptr) {
-//        pFunc = PyObject_GetAttrString(pModule, "translate");
-
-//        if (pFunc && PyCallable_Check(pFunc)) {
-//            pArgs = PyTuple_New(1);
-//            pValue = PyUnicode_FromString(text_stdstr.c_str());
-//            if (!pValue) {
-//                Py_DECREF(pArgs);
-//                Py_DECREF(pModule);
-//                emit execution_finished(
-//                    execution_codes::error,
-//                    "[Error] Can't convert string to py string.");
-//                return;
-//            }
-//            PyTuple_SetItem(pArgs, 0, pValue);
-//            pValue = PyObject_CallObject(pFunc, pArgs);
-//            Py_DECREF(pArgs);
-//            if (pValue != nullptr) {
-//                pResultCode = PyTuple_GetItem(pValue, 0);
-//                code = PyLong_AsLong(pResultCode);
-//                if (!pResultCode) {
-//                    Py_DECREF(pValue);
-//                    emit execution_finished(execution_codes::error,
-//                                            "[Error] Can't get result code.");
-//                    return;
-//                }
-//                pResultStr = PyTuple_GetItem(pValue, 1);
-//                if (!pResultStr) {
-//                    Py_DECREF(pValue);
-//                    emit execution_finished(execution_codes::error,
-//                                            "[Error] Can't get result
-//                                            string.");
-//                    return;
-//                }
-//                result = QString::fromUtf8(PyUnicode_AsUTF8(pResultStr));
-//                Py_DECREF(pValue);
-//            } else {
-//                Py_DECREF(pFunc);
-//                Py_DECREF(pModule);
-//                PyErr_Print();
-//                emit execution_finished(execution_codes::error,
-//                                        "[Error] Can't call the function.");
-//                return;
-//            }
-//        } else {
-//            if (PyErr_Occurred()) {
-//                PyErr_Print();
-//            }
-//            emit execution_finished(
-//                execution_codes::error,
-//                "[Error] Can't find the translate function.");
-//            Py_XDECREF(pFunc);
-//            Py_DECREF(pModule);
-//        }
-//    } else {
-//        PyErr_Print();
-//        emit execution_finished(execution_codes::error,
-//                                "[Error] Can't load the script file.");
-//        return;
-//    }
-//    if (Py_FinalizeEx() < 0) {
-//        fprintf(stderr, "Failed to finalize python interpreter.\n");
-//    }
-//    std::cout << result.toStdString() << std::endl;
-//    emit execution_finished(
-//        code == 0 ? execution_codes::finished : execution_codes::error,
-//        result);
-//    return;
-//}

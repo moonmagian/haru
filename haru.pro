@@ -11,6 +11,7 @@ QMAKE_CXXFLAGS += "-Wno-old-style-cast"
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/game_entry.cpp \
     src/hook_display_widget.cpp \
     src/main.cpp \
     src/game_window.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
     src/translating_worker_lua.cpp
 
 HEADERS += \
+    src/game_entry.h \
     src/game_window.h \
     src/hook_display_widget.h \
     src/main_window.h \
@@ -41,12 +43,13 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-#LIBS += -llua5.3
-LIBS += -llua
 
 unix: INCLUDEPATH += /usr/include/lua5.3
 unix: DEPENDPATH += /usr/include/lua5.3
 unix: DEFINES += USE_WINE
+unix: LIBS += -llua5.3
+win32: LIBS += -llua
 
 RESOURCES += \
     src/resources/images.qrc
+

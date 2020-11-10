@@ -45,7 +45,7 @@ QWidget{background: transparent;border: none}</string>
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>true</bool>
@@ -140,19 +140,16 @@ QWidget{background: transparent;border: none}</string>
           </spacer>
          </item>
          <item>
-          <widget class="QTableWidget" name="game_table">
-           <property name="rowCount">
-            <number>3</number>
+          <widget class="QListWidget" name="game_table">
+           <property name="iconSize">
+            <size>
+             <width>64</width>
+             <height>64</height>
+            </size>
            </property>
-           <property name="columnCount">
-            <number>3</number>
+           <property name="resizeMode">
+            <enum>QListView::Adjust</enum>
            </property>
-           <row/>
-           <row/>
-           <row/>
-           <column/>
-           <column/>
-           <column/>
           </widget>
          </item>
         </layout>

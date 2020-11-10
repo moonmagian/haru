@@ -2,6 +2,7 @@
 #define MAIN_WINDOW_H
 
 #include <QMainWindow>
+#include "game_entry.h"
 #include "game_window.h"
 namespace Ui {
 class main_window;
@@ -23,6 +24,7 @@ class main_window : public QMainWindow {
     private:
     game_window *game;
     Ui::main_window *ui;
+    void refresh_game_list();
 };
 
 #endif // MAIN_WINDOW_H

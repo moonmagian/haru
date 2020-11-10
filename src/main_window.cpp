@@ -1,11 +1,16 @@
 #include "main_window.h"
 #include "ui_main_window.h"
+#include "game_entry.h"
 #include <QtGlobal>
 #include <QPair>
+#include <QFileInfo>
+#include <QFileSystemModel>
+#include <QFileIconProvider>
 main_window::main_window(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::main_window), game(nullptr) {
     ui->setupUi(this);
     ui->gamelist->setLayout(ui->gamelist_layout);
+    refresh_game_list();
 }
 
 main_window::~main_window() { delete ui; }
@@ -47,4 +52,26 @@ void main_window::on_refresh_clicked() {
         ui->process_list->addItem(x, process_pid);
     }
 #endif
+}
+
+void main_window::refresh_game_list() {
+    auto games = game_entry::get_game_list();
+    for (const auto &g : games) {
+        QListWidgetItem *item = new QListWidgetItem();
+        item->setText(g.name);
+        item->setData(Qt::UserRole, g.executable);
+        item->setData(Qt::UserRole + 1, g.param);
+        if (!g.icon.isEmpty()) {
+            item->setIcon(QIcon(g.icon));
+        } else {
+            // extract icon from file.
+            QFileInfo fin(g.executable);
+            QFileSystemModel *model = new QFileSystemModel;
+            model->setRootPath(fin.path());
+            QFileIconProvider *ip = model->iconProvider();
+            item->setIcon(ip->icon(fin));
+            delete model;
+        }
+        ui->game_table->addItem(item);
+    }
 }

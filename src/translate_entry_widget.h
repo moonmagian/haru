@@ -22,7 +22,7 @@ class translate_entry_widget : public QWidget {
     void set_script(const QString &script);
     QString get_name();
     void push_text(const QString &text);
-
+    void init_worker();
     public slots:
     void update_execution_result(const QString &result);
 

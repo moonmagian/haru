@@ -15,8 +15,10 @@ class translating_worker : public QThread {
     void set_text(const QString &text);
     void set_path(const QString &path);
     virtual void run() = 0;
+    virtual void init() = 0;
     unsigned long get_freshness() const;
     void set_freshness(unsigned long value);
+    virtual ~translating_worker() = default;
 
     signals:
     void translation_done(QString text);

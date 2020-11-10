@@ -3,11 +3,9 @@
 #include <lauxlib.h>
 #include <lualib.h>
 #include <QMutex>
-translating_worker_lua::translating_worker_lua() : L(nullptr) {}
+translating_worker_lua::translating_worker_lua() : L(nullptr), inited(false) {}
 
-void translating_worker_lua::run() {
-    QString result;
-    std::string text_stdstr = text.toStdString();
+void translating_worker_lua::init() {
     std::string script_stdstr = path.toStdString();
     if (L != nullptr) {
         lua_close(L);
@@ -19,19 +17,27 @@ void translating_worker_lua::run() {
         if (lua_pcall(L, 0, 1, 0) == LUA_OK) {
             lua_pop(L, lua_gettop(L));
         } else {
-            emit translation_done("[Error] The script file can't be executed.");
+            error = "[Error] The script file can't be executed.";
             qCritical("The script file can't be executed, %s",
                       lua_tostring(L, -1));
             return;
         }
     } else {
-        emit translation_done(
-            "[Error] The script file can't be read or contains syntax error.");
+        error =
+            "[Error] The script file can't be read or contains syntax error.";
         qCritical("The script file can't be read or contains syntax error, %s",
                   lua_tostring(L, -1));
         return;
     }
-    // Put function on stack.
+    inited = true;
+}
+void translating_worker_lua::run() {
+    if (!inited) {
+        emit translation_done(error);
+        return;
+    }
+    QString result;
+    std::string text_stdstr = text.toStdString(); // Put function on stack.
     lua_getglobal(L, "translate");
     // Put the argument.
     lua_pushstring(L, text_stdstr.c_str());
@@ -52,8 +58,12 @@ void translating_worker_lua::run() {
     }
     // Remove the function from the stack.
     lua_pop(L, lua_gettop(L));
-    lua_close(L);
-    L = nullptr;
     emit translation_done(result);
     return;
+}
+
+translating_worker_lua::~translating_worker_lua() {
+    if (L != nullptr) {
+        lua_close(L);
+    }
 }

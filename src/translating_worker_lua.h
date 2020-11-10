@@ -10,7 +10,11 @@ class translating_worker_lua : public translating_worker {
 
     public:
     translating_worker_lua();
+    void init() override;
     void run() override;
+    ~translating_worker_lua() override;
+    bool inited;
+    QString error;
 };
 
 #endif // TRANSLATING_WORKER_PYTHON_H

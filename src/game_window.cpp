@@ -26,6 +26,7 @@ game_window::game_window(QWidget *parent)
     ui->hook_scroll_contents->setLayout(ui->hook_scroll_list);
     connect(&textractor, &textractor_wrapper::updated_hook_text, this,
             &game_window::got_hook_text);
+    //   ui->debug_button_pushtext->hide();
     setMouseTracking(false);
     textractor.attach(924);
     x = 0;
@@ -143,6 +144,7 @@ void game_window::init_plugins() {
         w->set_name(plugin_name.toString());
         w->set_script(
             QString("plugins/%1/%2").arg(plugin_str, plugin_script.toString()));
+        w->init_worker();
         translating_entries.append(w);
         connect(w, &translate_entry_widget::execution_finished, this,
                 &game_window::got_new_translated_text);
