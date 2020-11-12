@@ -13,6 +13,7 @@ QMAKE_CXXFLAGS += "-Wno-old-style-cast"
 SOURCES += \
     src/game_entry.cpp \
     src/hook_display_widget.cpp \
+    src/lua_worker_http_extension.cpp \
     src/main.cpp \
     src/game_window.cpp \
     src/main_window.cpp \
@@ -25,6 +26,7 @@ HEADERS += \
     src/game_entry.h \
     src/game_window.h \
     src/hook_display_widget.h \
+    src/lua_worker_http_extension.h \
     src/main_window.h \
     src/textractor_wrapper.h \
     src/translate_entry_widget.h \

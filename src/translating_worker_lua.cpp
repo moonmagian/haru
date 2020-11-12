@@ -1,4 +1,5 @@
 #include "translating_worker_lua.h"
+#include "lua_worker_http_extension.h"
 #include <lua.hpp>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -12,6 +13,7 @@ void translating_worker_lua::init() {
         L = nullptr;
     }
     L = luaL_newstate();
+    lua_worker_http_extension::load_lib(L);
     luaL_openlibs(L);
     if (luaL_loadfile(L, script_stdstr.c_str()) == LUA_OK) {
         if (lua_pcall(L, 0, 1, 0) == LUA_OK) {
