@@ -1,5 +1,5 @@
-#ifndef TRANSLATING_WORKER_PYTHON_H
-#define TRANSLATING_WORKER_PYTHON_H
+#ifndef TRANSLATING_WORKER_LUA_H
+#define TRANSLATING_WORKER_LUA_H
 
 #include "translating_worker.h"
 #include <lua.hpp>
@@ -15,6 +15,7 @@ class translating_worker_lua : public translating_worker {
     ~translating_worker_lua() override;
     bool inited;
     QString error;
+    QMutex mutex;
 };
 
 #endif // TRANSLATING_WORKER_PYTHON_H

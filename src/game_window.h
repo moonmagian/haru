@@ -16,7 +16,7 @@ class game_window : public QWidget {
     Q_OBJECT
 
     public:
-    game_window(QWidget *parent = nullptr);
+    game_window(unsigned int game_pid, QWidget *parent = nullptr);
     ~game_window() override;
     signals:
     void exit_game_window();

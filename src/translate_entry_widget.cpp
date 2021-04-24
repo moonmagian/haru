@@ -1,18 +1,24 @@
 #include "translate_entry_widget.h"
 #include "ui_translate_entry_widget.h"
 #include "translating_worker_lua.h"
+#include "translating_worker_python.h"
 #include <iostream>
 #include <lua.hpp>
 #include <lualib.h>
 #include <lauxlib.h>
 #include <QGraphicsDropShadowEffect>
-translate_entry_widget::translate_entry_widget(QWidget *parent)
-    : QWidget(parent), ui(new Ui::translate_entry_widget),
-      worker(new translating_worker_lua) {
+translate_entry_widget::translate_entry_widget(const QString &type,
+                                               QWidget *parent)
+    : QWidget(parent), ui(new Ui::translate_entry_widget) {
     ui->setupUi(this);
     this->setLayout(ui->horizontalLayout);
     //    connect(this, &translate_entry_widget::execution_finished, this,
     //            &translate_entry_widget::update_execution_result);
+    if (type == "python") {
+        worker = new translating_worker_python;
+    } else if (type == "lua") {
+        worker = new translating_worker_lua;
+    }
     worker->connect(worker, &translating_worker::translation_done, this,
                     &translate_entry_widget::update_execution_result);
     freshness = 0;

@@ -17,7 +17,7 @@ main_window::~main_window() { delete ui; }
 
 void main_window::on_pushButton_clicked() {
     if (!game) {
-        game = new game_window(nullptr);
+        game = new game_window(32, nullptr);
         connect(game, &game_window::exit_game_window, this,
                 &main_window::gamewindow_close);
         game->show();
@@ -33,6 +33,15 @@ void main_window::gamewindow_close() {
 
 void main_window::on_refresh_clicked() {
     ui->process_list->clear();
+    auto plist = get_process_list();
+    for (const auto &p : plist) {
+        ui->process_list->addItem(QString("%1, %2").arg(p.name).arg(p.pid),
+                                  p.pid);
+    }
+}
+
+QVector<process_entry> main_window::get_process_list() {
+    QVector<process_entry> result;
 #ifdef USE_WINE
     // Get task list using wine.
     QProcess p(this);
@@ -49,9 +58,29 @@ void main_window::on_refresh_clicked() {
         auto single_process = x.split(",");
         int process_pid = single_process.last().toInt();
         single_process.removeLast();
-        ui->process_list->addItem(x, process_pid);
+        result.append({single_process.last(), process_pid});
     }
 #endif
+#ifndef USE_WINE
+    // Get task list using native windows api.
+    QProcess p(this);
+    QStringList arguments;
+    arguments << "/fo csv /nh";
+    p.start("tasklist", arguments);
+    p.waitForFinished();
+    QString list = QString::fromUtf8(p.readAllStandardOutput());
+    qDebug("%s", list.toStdString().c_str());
+    auto process_list = list.split("\n");
+    for (const auto &x : process_list) {
+        if (x.count() == 0)
+            continue;
+        auto single_process = x.split(",");
+        QString pname = single_process[0].chopped(1).mid(1);
+        int process_pid = single_process[1].chopped(1).mid(1).toInt();
+        result.append({pname, process_pid});
+    }
+#endif
+    return result;
 }
 
 void main_window::refresh_game_list() {
@@ -73,5 +102,18 @@ void main_window::refresh_game_list() {
             delete model;
         }
         ui->game_table->addItem(item);
+    }
+}
+
+void main_window::on_run_clicked() {
+    if (ui->process_list->currentIndex() != -1) {
+        if (!game) {
+            game = new game_window(ui->process_list->currentData().toUInt(),
+                                   nullptr);
+            connect(game, &game_window::exit_game_window, this,
+                    &main_window::gamewindow_close);
+            game->show();
+            this->hide();
+        }
     }
 }

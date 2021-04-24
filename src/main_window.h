@@ -4,6 +4,11 @@
 #include <QMainWindow>
 #include "game_entry.h"
 #include "game_window.h"
+struct process_entry {
+    QString name;
+    int pid;
+};
+
 namespace Ui {
 class main_window;
 }
@@ -13,17 +18,20 @@ class main_window : public QMainWindow {
 
     public:
     explicit main_window(QWidget *parent = nullptr);
-    ~main_window();
+    ~main_window() override;
 
     private slots:
     void on_pushButton_clicked();
     void gamewindow_close();
 
     void on_refresh_clicked();
+    QVector<process_entry> get_process_list();
+
+    void on_run_clicked();
 
     private:
-    game_window *game;
     Ui::main_window *ui;
+    game_window *game;
     void refresh_game_list();
 };
 

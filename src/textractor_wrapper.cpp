@@ -75,4 +75,5 @@ void textractor_wrapper::on_process_data_ready() {
         emit updated_hook_text(name, value);
         qDebug("%s", value.toStdString().c_str());
     }
+    delete decoder;
 }

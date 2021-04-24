@@ -105,6 +105,12 @@ QWidget{background: transparent;border: none}</string>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="styleSheet">
+              <string notr="true">QComboBox QAbstractItemView
+{
+background: rgba(0, 0, 0, 150);
+}</string>
+             </property>
             </widget>
            </item>
            <item>

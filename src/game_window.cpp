@@ -9,7 +9,7 @@
 #include <QTabBar>
 #include <QCloseEvent>
 #include <QDesktopWidget>
-game_window::game_window(QWidget *parent)
+game_window::game_window(unsigned int game_pid, QWidget *parent)
     : QWidget(parent), ui(new Ui::game_window), using_hook(), pause(false),
       drag_flag(false), resize_flag(false) {
     ui->setupUi(this);
@@ -28,7 +28,7 @@ game_window::game_window(QWidget *parent)
             &game_window::got_hook_text);
     //   ui->debug_button_pushtext->hide();
     setMouseTracking(false);
-    textractor.attach(924);
+    textractor.attach(game_pid);
     x = 0;
 }
 
@@ -131,6 +131,7 @@ void game_window::init_plugins() {
         }
         QJsonValue plugin_name = meta_document["name"];
         QJsonValue plugin_script = meta_document["script"];
+        QJsonValue plugin_type = meta_document["type"];
         if (!plugin_name.isString()) {
             qCritical("Can't get name of plugin: %s.", plugin_str_std.c_str());
             continue;
@@ -140,7 +141,16 @@ void game_window::init_plugins() {
                       plugin_str_std.c_str());
             continue;
         }
-        translate_entry_widget *w = new translate_entry_widget(this);
+        if (!plugin_type.isString()) {
+            qCritical("Can't get type of plugin: %s.", plugin_str_std.c_str());
+            continue;
+        }
+        auto type_str = plugin_type.toString();
+        if (plugin_type != "python" && plugin_type != "lua") {
+            qCritical("Invalid type of plugin: %s.", plugin_str_std.c_str());
+            continue;
+        }
+        translate_entry_widget *w = new translate_entry_widget(type_str, this);
         w->set_name(plugin_name.toString());
         w->set_script(
             QString("plugins/%1/%2").arg(plugin_str, plugin_script.toString()));
@@ -178,7 +188,7 @@ void game_window::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-void game_window::mouseReleaseEvent(QMouseEvent *event) {
+void game_window::mouseReleaseEvent(QMouseEvent *) {
     if (drag_flag) {
         QGuiApplication::restoreOverrideCursor();
         drag_flag = false;
@@ -201,7 +211,7 @@ void game_window::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
-void game_window::enterEvent(QEvent *event) {
+void game_window::enterEvent(QEvent *) {
     if (!drag_flag && !resize_flag) {
         auto original_size = size();
         QSize nsize;
@@ -216,7 +226,7 @@ void game_window::enterEvent(QEvent *event) {
     }
 }
 
-void game_window::leaveEvent(QEvent *event) {
+void game_window::leaveEvent(QEvent *) {
     if (!drag_flag && !resize_flag) {
         auto original_size = size();
         QSize nsize;
@@ -236,4 +246,4 @@ void game_window::on_pause_tool_button_toggled(bool checked) {
 
 void game_window::on_close_tool_button_clicked() { close(); }
 
-void game_window::on_close_tool_button_toggled(bool checked) {}
+void game_window::on_close_tool_button_toggled(bool) {}

@@ -15,8 +15,8 @@ class translate_entry_widget : public QWidget {
     void execution_finished(QString name, QString result);
 
     public:
-    explicit translate_entry_widget(QWidget *parent = nullptr);
-    ~translate_entry_widget();
+    translate_entry_widget(const QString &type, QWidget *parent = nullptr);
+    ~translate_entry_widget() override;
 
     void set_name(const QString &name);
     void set_script(const QString &script);
@@ -27,11 +27,11 @@ class translate_entry_widget : public QWidget {
     void update_execution_result(const QString &result);
 
     private:
+    Ui::translate_entry_widget *ui;
     QString current_text;
     unsigned long freshness;
     translating_worker *worker;
     QString script;
-    Ui::translate_entry_widget *ui;
 };
 
 #endif // TRANSLATE_ENTRY_WIDGET_H
